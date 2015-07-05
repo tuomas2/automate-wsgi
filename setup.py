@@ -11,7 +11,7 @@ def get_version(filename):
         return metadata['version']
 
 setupopts = dict(
-    name="automate_wsgi",
+    name="automate-wsgi",
     version=get_version('automate_wsgi/__init__.py'),
     packages=find_packages(),
 
