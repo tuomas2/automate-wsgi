@@ -26,7 +26,7 @@ setupopts = dict(
                      "It is of no use alone.",
     license="GPL",
     keywords="automation, GPIO, Raspberry Pi, RPIO, enaml, traits",
-    url="http://github.com/tuomas2/automate_webui",
+    url="http://github.com/tuomas2/automate-wsgi",
     entry_points={},
 
     classifiers=["Development Status :: 4 - Beta",
