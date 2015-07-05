@@ -1,2 +1,3 @@
 *.pyc
 /automate_wsgi.egg-info/
+/dist/
