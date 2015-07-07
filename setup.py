@@ -21,9 +21,7 @@ setupopts = dict(
     author="Tuomas Airaksinen",
     author_email="tuomas.airaksinen@gmail.com",
     description="WSGI Support for Automate",
-    long_description="This extension provides Web server for WSGI-aware extensions, "
-                     "such as Remote Procedure Call Support for Automate, Web User Interface for Automate. "
-                     "It is of no use alone.",
+    long_description=open('README.rst').read(),
     license="GPL",
     keywords="automation, GPIO, Raspberry Pi, RPIO, enaml, traits",
     url="http://github.com/tuomas2/automate-wsgi",

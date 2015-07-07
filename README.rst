@@ -1,10 +1,8 @@
-
 WSGI Support for Automate
 =========================
 
-Automate is a general purpose Python automatization library.
 See documentation at
-http://python-automate.readthedocs.org/en/latest/official_extensions/wsgi.html
+`Readthedocs.org <http://python-automate.readthedocs.org/en/latest/official_extensions/wsgi.html>`_.
 
 Licence
 -------
