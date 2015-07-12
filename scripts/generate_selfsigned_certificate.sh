@@ -15,4 +15,4 @@ fname=$(openssl x509 -inform PEM -subject_hash -in ${cert}.crt|head -n 1)
 cp ${cert}.crt ${fname}.0
 
 echo "now copy ${fname}.0 to /system/etc/security/cacerts in your android"
-echo "and run on local machine certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n raspi1.tuomasairaksinen.fi -i ${fname}.0"
+echo "and run on local machine certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n yourhost.net -i ${fname}.0"
