@@ -14,7 +14,7 @@ setupopts = dict(
     packages=find_packages(),
 
     install_requires=[
-        "automate==0.9.1",
+        "automate>=0.9.2,<=0.10",
         "tornado==4.2"
         ],
 
