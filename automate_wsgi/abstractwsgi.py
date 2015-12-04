@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with automate-wsgi.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 import threading
 import socket
 
@@ -88,7 +89,7 @@ class TornadoService(AbstractUserService):
         if websocket:
             tornado_handlers.append(('/socket', websocket))
 
-        for entrypoint, path in self.static_dirs.iteritems():
+        for entrypoint, path in self.static_dirs.items():
             tornado_handlers.append((entrypoint, self.get_filehandler_class(), {'path': path}))
 
         wsgi_app = self.get_wsgi_application()
