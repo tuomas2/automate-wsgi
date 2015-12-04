@@ -126,6 +126,12 @@ class TornadoService(AbstractUserService):
         else:
             self.logger.debug('Tornado IOLoop already running, no need to start new')
 
+    def reload(self):
+        if self.is_alive:
+            self._server.stop()
+            self._web_thread.join()
+        self.setup()
+
     def cleanup(self):
         if self.is_alive:
             self._server.stop()
