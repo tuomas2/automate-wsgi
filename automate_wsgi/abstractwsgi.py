@@ -64,7 +64,8 @@ class TornadoService(AbstractUserService):
     #:    static_dirs = {'/my_static/(.*)': '/path/to/my_static'}
     static_dirs = Dict(key_trait=Str, value_trait=Str)
 
-    _server = Instance(tornado.ioloop.IOLoop)
+    _ioloop = Instance(tornado.ioloop.IOLoop)
+    _http_server = Instance(tornado.httpserver.TCPServer)
     _web_thread = Instance(threading.Thread)
 
     @property
@@ -113,20 +114,21 @@ class TornadoService(AbstractUserService):
         else:
             ssl_options = None
 
-        server = tornado.httpserver.HTTPServer(tornado_app, ssl_options=ssl_options)
+        self._http_server = tornado.httpserver.HTTPServer(tornado_app, ssl_options=ssl_options)
 
         try:
-            server.listen(self.http_port, self.http_ipaddr)
+            self._http_server.listen(self.http_port, self.http_ipaddr)
         except socket.error as e:
             self.logger.error('Could not start server: %s', e)
             return
 
-        self._server = tornado.ioloop.IOLoop.instance()
-        self._web_thread = threading.Thread(target=threaded(self._server.start),
+        self._ioloop = tornado.ioloop.IOLoop.instance()
+        self._web_thread = threading.Thread(target=threaded(self._ioloop.start),
                                             name="%s::%s" % (self.system.name, self.__class__.__name__))
         self._web_thread.start()
 
     def cleanup(self):
         if self.is_alive:
-            self._server.stop()
+            self._ioloop.stop()
+            self._http_server.stop()
             self._web_thread.join()
