@@ -34,8 +34,8 @@ from automate.service import AbstractUserService
 
 web_thread = None
 
-class TornadoService(AbstractUserService):
 
+class TornadoService(AbstractUserService):
     """
     Abstract service that provides HTTP server for WSGI applications.
     """
@@ -65,12 +65,11 @@ class TornadoService(AbstractUserService):
     #:    static_dirs = {'/my_static/(.*)': '/path/to/my_static'}
     static_dirs = Dict(key_trait=Str, value_trait=Str)
 
-    _ioloop = Instance(tornado.ioloop.IOLoop)
     _http_server = Instance(tornado.httpserver.TCPServer)
 
     @property
     def is_alive(self):
-        return web_thread and web_thread.is_alive()
+        return bool(self._http_server)
 
     def get_wsgi_application(self):
         """
@@ -101,7 +100,6 @@ class TornadoService(AbstractUserService):
         return tornado_handlers
 
     def setup(self):
-        global web_thread
         if self.is_alive:
             self.logger.debug('Server is already running, no need to start new')
 
@@ -121,16 +119,22 @@ class TornadoService(AbstractUserService):
             self._http_server.listen(self.http_port, self.http_ipaddr)
         except socket.error as e:
             self.logger.error('Could not start server: %s', e)
+            self._http_server = None
             return
 
-        self._ioloop = tornado.ioloop.IOLoop.instance()
-        if not self._ioloop._running:
-            web_thread = threading.Thread(target=threaded(self._ioloop.start),
-                                                name="%s::%s" % (self.system.name, self.__class__.__name__))
+        self.start_ioloop()
+
+    def start_ioloop(self):
+        global web_thread
+        ioloop = tornado.ioloop.IOLoop.instance()
+        if not ioloop._running:
+            web_thread = threading.Thread(target=threaded(ioloop.start),
+                                          name="%s::%s" % (self.system.name, self.__class__.__name__))
             web_thread.start()
 
     def cleanup(self):
         if self.is_alive:
-            self._ioloop.stop()
+            tornado.ioloop.IOLoop.instance().stop()
             self._http_server.stop()
+            self._http_server = None
             web_thread.join()
