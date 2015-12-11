@@ -100,6 +100,9 @@ class TornadoService(AbstractUserService):
         return tornado_handlers
 
     def setup(self):
+        if self.is_alive:
+            self.logger.debug('Server is already running, no need to start new')
+
         tornado_app = tornado.web.Application(self.get_tornado_handlers())
 
         if self.ssl_certificate and self.ssl_private_key:
@@ -116,22 +119,14 @@ class TornadoService(AbstractUserService):
             server.listen(self.http_port, self.http_ipaddr)
         except socket.error as e:
             self.logger.error('Could not start server: %s', e)
+            return
 
         self._server = tornado.ioloop.IOLoop.instance()
-        if not self._server._running:
-            self._web_thread = threading.Thread(target=threaded(self._server.start),
-                                                name="%s::%s" % (self.system.name, self.__class__.__name__))
-
-            self._web_thread.start()
-        else:
-            self.logger.debug('Tornado IOLoop already running, no need to start new')
-
-    def reload(self):
-        if self.is_alive:
-            self._server.stop()
-            self._web_thread.join()
-        self.setup()
+        self._web_thread = threading.Thread(target=threaded(self._server.start),
+                                            name="%s::%s" % (self.system.name, self.__class__.__name__))
+        self._web_thread.start()
 
     def cleanup(self):
         if self.is_alive:
             self._server.stop()
+            self._web_thread.join()
