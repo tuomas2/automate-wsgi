@@ -32,6 +32,7 @@ from traits.api import Instance, Int, CStr, Dict, Str
 from automate.common import threaded
 from automate.service import AbstractUserService
 
+web_thread = None
 
 class TornadoService(AbstractUserService):
 
@@ -66,11 +67,10 @@ class TornadoService(AbstractUserService):
 
     _ioloop = Instance(tornado.ioloop.IOLoop)
     _http_server = Instance(tornado.httpserver.TCPServer)
-    _web_thread = Instance(threading.Thread)
 
     @property
     def is_alive(self):
-        return self._web_thread and self._web_thread.is_alive()
+        return web_thread and web_thread.is_alive()
 
     def get_wsgi_application(self):
         """
@@ -101,6 +101,7 @@ class TornadoService(AbstractUserService):
         return tornado_handlers
 
     def setup(self):
+        global web_thread
         if self.is_alive:
             self.logger.debug('Server is already running, no need to start new')
 
@@ -123,12 +124,13 @@ class TornadoService(AbstractUserService):
             return
 
         self._ioloop = tornado.ioloop.IOLoop.instance()
-        self._web_thread = threading.Thread(target=threaded(self._ioloop.start),
-                                            name="%s::%s" % (self.system.name, self.__class__.__name__))
-        self._web_thread.start()
+        if not self._ioloop._running:
+            web_thread = threading.Thread(target=threaded(self._ioloop.start),
+                                                name="%s::%s" % (self.system.name, self.__class__.__name__))
+            web_thread.start()
 
     def cleanup(self):
         if self.is_alive:
             self._ioloop.stop()
             self._http_server.stop()
-            self._web_thread.join()
+            web_thread.join()
