@@ -15,7 +15,7 @@ setupopts = dict(
 
     install_requires=[
         "automate>=0.9.2,<0.10",
-        "tornado==4.2"
+        "tornado==6.3.3"
         ],
 
     author="Tuomas Airaksinen",
